@@ -1,10 +1,10 @@
 import express from 'express'
 import books from './routes/bookRoutes.js'
 import review from './routes/reviewRoutes.js'
-import connection from './config/db.js'
+import connectDB from './config/db.js'
 import cors from 'cors'
 
-connection
+connectDB
 const app = express()
 const port = 3000
 

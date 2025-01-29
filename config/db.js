@@ -1,7 +1,19 @@
 import { connect } from 'mongoose';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const databaseName = "TheBookHeaven"
 
-const connection = await connect(`mongodb://127.0.0.1:27017/${databaseName}`);
+const connectDB = async () => {
+  try {
+    await connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('MongoDB connected');
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
+  }
+};
 
-export default connection;
+export default connectDB();
