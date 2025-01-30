@@ -65,6 +65,28 @@ Welcome to **The Book Heaven**, a full-stack book recommendation system built wi
 - **CORS & Helmet** - Security enhancements.
 - **Multer** - File handling for future enhancements.
 
+
+## 📡 API Endpoints
+
+### **Books API**
+| Method | Endpoint           | Description                     |
+|--------|--------------------|---------------------------------|
+| GET    | `/api/books`       | Get all books                   |
+| GET    | `/api/books/:id`   | Get a book by ID                |
+| POST   | `/api/books`       | Add a new book                  |
+| PUT    | `/api/books/:id`   | Update a book                   |
+| DELETE | `/api/books/:id`   | Delete a book                   |
+
+### **Reviews API**
+| Method | Endpoint                      | Description                           |
+|--------|--------------------------------|---------------------------------------|
+| GET    | `/api/books/:id/reviews`      | Get reviews for a specific book      |
+| POST   | `/api/books/:id/reviews`      | Add a review to a book               |
+| PUT    | `/api/reviews/:id`            | Update a review                      |
+| DELETE | `/api/reviews/:id`            | Delete a review                      |
+
+---
+
 ## 🏗️ Installation & Setup
 
 ### **Frontend**
