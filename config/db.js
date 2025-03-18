@@ -1,19 +1,19 @@
-import { connect } from 'mongoose';
-import dotenv from 'dotenv';
-dotenv.config();
+import mongoose from "mongoose";
+import { DB_URI } from "../config/env.js";
+import process from 'node:process';
 
+if(!DB_URI){
+    throw new Error('Please define the MONGODB_URI environmental variable inside .env')
+}
 
-const connectDB = async () => {
-  try {
-    await connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('MongoDB connected');
-  } catch (err) {
-    console.error(err.message);
-    process.exit(1);
-  }
-};
+const connectToDatabase = async () => {
+    try {
+        await mongoose.connect(DB_URI);
+        console.log('Connected to Database Successfully')
+    } catch (error) {
+        console.error('Error connecting to database: ', error)
+        process.exit(1);
+    }
+}
 
-export default connectDB();
+export default connectToDatabase;
