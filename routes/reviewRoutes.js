@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Review from '../models/Review.js';
 import Book from '../models/Book.js';
 import mongoose from "mongoose";
+import { authorize, authorizeRole } from '../middleware/auth.middleware.js';
 const router = Router();
 
 // Middleware
@@ -12,7 +13,7 @@ const timeLog = (req, res, next) => {
 router.use(timeLog);
 
 // Get all reviews for a specific book
-router.get('/books/:id/reviews', async (req, res) => {
+router.get('/books/:id/reviews', authorize, async (req, res) => {
   try {
     const { id } = req.params;
     const reviews = await Review.find({ bookId: id });
@@ -23,7 +24,7 @@ router.get('/books/:id/reviews', async (req, res) => {
 });
 
 // Create a new review for a book
-router.post('/books/:id/reviews', async (req, res) => {
+router.post('/books/:id/reviews', authorize, async (req, res) => {
   try {
     const { id } = req.params;
     // Validate if the ID is a valid ObjectId
@@ -50,7 +51,7 @@ router.post('/books/:id/reviews', async (req, res) => {
 });
 
 // Update a review
-router.put('/reviews/:id', async (req, res) => {
+router.put('/reviews/:id', authorize, async (req, res) => {
   try {
     const { id } = req.params;
     const updatedReview = await Review.findByIdAndUpdate(
@@ -69,7 +70,7 @@ router.put('/reviews/:id', async (req, res) => {
 });
 
 // Delete a review
-router.delete('/reviews/:id', async (req, res) => {
+router.delete('/reviews/:id', authorize, async (req, res) => {
   try {
     const { id } = req.params;
     const deletedReview = await Review.findByIdAndDelete(id);
