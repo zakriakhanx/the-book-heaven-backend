@@ -11,7 +11,8 @@ export const signUp = async (req, res, next) => {
 
     try { //logic to create new user
 
-        const { userName, email, password } = req.body;
+        const { name, email, password } = req.body;
+        const userName = name;
 
         // Check if a user already exists
         const existingUser = await User.findOne({ email });
@@ -36,10 +37,10 @@ export const signUp = async (req, res, next) => {
         res.status(201).json({
             success: true,
             message: 'User created successfully',
-            data: {
-                token,
-                user: newUsers[0]
-            }
+            token,
+            userId: newUsers[0]._id,
+            role: newUsers[0].role,
+            userName: newUsers[0].userName,
         })
 
     } catch (error) {
@@ -75,7 +76,7 @@ export const signIn = async (req, res, next) => {
         res.status(200).json({
             success: true,
             message: 'User signed in successfully',
-            token: token,
+            token,
             userId: user._id,
             role: user.role,
             userName: user.userName,
