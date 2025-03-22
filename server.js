@@ -12,7 +12,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(arcjetMiddleware);
+// app.use(arcjetMiddleware);
 
 app.use('/api', books);
 app.use('/api', review);

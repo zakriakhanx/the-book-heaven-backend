@@ -12,7 +12,7 @@ const timeLog = (req, res, next) => {
 router.use(timeLog);
 
 // Retrieve a list of all books
-router.get('/books', authorize, async (req, res) => {
+router.get('/books', async (req, res) => {
   try {
     const books = await Book.find();
     res.status(200).json(books);

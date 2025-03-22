@@ -13,7 +13,7 @@ const timeLog = (req, res, next) => {
 router.use(timeLog);
 
 // Get all reviews for a specific book
-router.get('/books/:id/reviews', authorize, async (req, res) => {
+router.get('/books/:id/reviews', async (req, res) => {
   try {
     const { id } = req.params;
     const reviews = await Review.find({ bookId: id });
