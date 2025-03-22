@@ -22,10 +22,10 @@ router.get('/books', async (req, res) => {
 });
 
 // Add a new book to the database
-router.post('/books', authorize, async (req, res) => {
+router.post('/books', authorize, authorizeRole('admin', 'user'), async (req, res) => {
   try {
     const { title, author, genre, description } = req.body;
-    const newBook = new Book({ title, author, genre, description });
+    const newBook = new Book({ title, author, genre, description, userId: req.user._id });
     await newBook.save();
     res.status(201).json(newBook);
   } catch (error) {
@@ -34,7 +34,7 @@ router.post('/books', authorize, async (req, res) => {
 });
 
 // Update details of an existing book
-router.put('/books/:id', authorize, async (req, res) => {
+router.put('/books/:id', authorize,  authorizeRole('admin', 'user'), async (req, res) => {
   try {
     const { id } = req.params;
     const updatedData = req.body;
@@ -53,7 +53,7 @@ router.put('/books/:id', authorize, async (req, res) => {
 });
 
 // Remove a book from the database
-router.delete('/books/:id', authorize, async (req, res) => {
+router.delete('/books/:id', authorize,  authorizeRole('admin', 'user'), async (req, res) => {
   try {
     const { id } = req.params;
     await Review.deleteMany({ bookId: id }) // Deleting all Reviews of this book

@@ -24,7 +24,7 @@ router.get('/books/:id/reviews', async (req, res) => {
 });
 
 // Create a new review for a book
-router.post('/books/:id/reviews', authorize, async (req, res) => {
+router.post('/books/:id/reviews', authorize, authorizeRole('admin', 'user'), async (req, res) => {
   try {
     const { id } = req.params;
     // Validate if the ID is a valid ObjectId
@@ -37,6 +37,7 @@ router.post('/books/:id/reviews', authorize, async (req, res) => {
     const { reviewerName, rating, comment } = req.body;
     const newReview = new Review({
       bookId: id,
+      userId: req.user._id,
       reviewerName,
       rating,
       comment
@@ -51,7 +52,7 @@ router.post('/books/:id/reviews', authorize, async (req, res) => {
 });
 
 // Update a review
-router.put('/reviews/:id', authorize, async (req, res) => {
+router.put('/reviews/:id', authorize, authorizeRole('admin', 'user'), async (req, res) => {
   try {
     const { id } = req.params;
     const updatedReview = await Review.findByIdAndUpdate(
@@ -70,7 +71,7 @@ router.put('/reviews/:id', authorize, async (req, res) => {
 });
 
 // Delete a review
-router.delete('/reviews/:id', authorize, async (req, res) => {
+router.delete('/reviews/:id', authorize, authorizeRole('admin', 'user'), async (req, res) => {
   try {
     const { id } = req.params;
     const deletedReview = await Review.findByIdAndDelete(id);
