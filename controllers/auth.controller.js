@@ -41,6 +41,7 @@ export const signUp = async (req, res, next) => {
             userId: newUsers[0]._id,
             role: newUsers[0].role,
             userName: newUsers[0].userName,
+            email: newUsers[0].email
         })
 
     } catch (error) {
@@ -80,8 +81,22 @@ export const signIn = async (req, res, next) => {
             userId: user._id,
             role: user.role,
             userName: user.userName,
+            email: user.email
         });
 
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getAllUsers = async (req, res, next) => {
+    try {
+        const users = await User.find({}).select('-password');
+        res.status(200).json({
+            success: true,
+            message: 'Users fetched successfully',
+            users
+        });
     } catch (error) {
         next(error);
     }

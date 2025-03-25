@@ -24,8 +24,8 @@ router.get('/books', async (req, res) => {
 // Add a new book to the database
 router.post('/books', authorize, authorizeRole('admin', 'user'), async (req, res) => {
   try {
-    const { title, author, genre, description } = req.body;
-    const newBook = new Book({ title, author, genre, description, userId: req.user._id });
+    const { title, author, genre, description, userName } = req.body;
+    const newBook = new Book({ title, author, genre, description, userId: req.user._id, userName: req.user.userName });
     await newBook.save();
     res.status(201).json(newBook);
   } catch (error) {

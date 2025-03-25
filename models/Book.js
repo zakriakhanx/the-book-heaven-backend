@@ -7,6 +7,10 @@ const bookSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  userName: {
+    type: String,
+    required: true
+  },
   title: {
     type: String,
     required: true
