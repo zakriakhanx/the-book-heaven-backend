@@ -24,10 +24,17 @@ export const addFavorite = async (req, res) => {
 export const deleteFavorite = async (req, res) => {
     try {
         const { id, bookId } = req.params;
-        const fav = await Favorite.findByIdAndDelete({ userId: id, bookId: bookId});
+
+        const favFind = await Favorite.findOne({ userId: id, bookId });
+        if (!favFind) {
+            return res.status(404).json({ message: 'Favorite not found' });
+        }
+
+        const fav = await Favorite.findByIdAndDelete(favFind._id);
         if (!fav) {
             return res.status(404).json({ message: 'Favorite Deleted' });
         }
+
         res.status(200).json({ message: 'Favorite deleted successfully', fav });
     } catch (error) {
         res.status(500).json({ message: 'Error deleting Favorite', error });
