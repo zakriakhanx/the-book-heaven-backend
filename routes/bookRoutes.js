@@ -1,8 +1,7 @@
 import { Router } from "express";
 import Book from "../models/Book.js";
 import Review from "../models/Review.js";
-import { getAuth } from "@clerk/express";
-import { requireAdmin } from "../middleware/auth.middleware.js";
+import { requireAuth, requireAdmin, getClerkIdentity } from "../middleware/auth.middleware.js";
 const router = Router();
 
 // Middleware
@@ -23,23 +22,18 @@ router.get("/books", async (req, res) => {
 });
 
 // Add a new book to the database
-router.post("/books", async (req, res) => {
+router.post("/books", requireAuth, async (req, res) => {
   try {
-    const { isAuthenticated } = getAuth(req);
+    const { title, author, genre, description } = req.body;
+    const { userId, userName } = getClerkIdentity(req);
 
-    if (!isAuthenticated) {
-      res.status(401).json({ error: "Unauthenticated" });
-      return;
-    }
-
-    const { title, author, genre, description, userName } = req.body;
     const newBook = new Book({
       title,
       author,
       genre,
       description,
-      userId: req.user._id,
-      userName: req.user.userName,
+      userId,
+      userName,
     });
     await newBook.save();
     res.status(201).json(newBook);
@@ -49,15 +43,8 @@ router.post("/books", async (req, res) => {
 });
 
 // Update details of an existing book
-router.put("/books/:id", async (req, res) => {
+router.put("/books/:id", requireAuth, async (req, res) => {
   try {
-    const { isAuthenticated } = getAuth(req);
-
-    if (!isAuthenticated) {
-      res.status(401).json({ error: "Unauthenticated" });
-      return;
-    }
-
     const { id } = req.params;
     const updatedData = req.body;
     const updatedBook = await Book.findByIdAndUpdate(
@@ -75,21 +62,22 @@ router.put("/books/:id", async (req, res) => {
 });
 
 // Remove a book from the database
-router.delete("/books/:id", async (req, res) => {
+router.delete("/books/:id", requireAuth, async (req, res) => {
   try {
-    const { isAuthenticated } = getAuth(req);
-
-    if (!isAuthenticated) {
-      res.status(401).json({ error: "Unauthenticated" });
-      return;
-    }
-    
     const { id } = req.params;
+    const { userId, role } = getClerkIdentity(req);
+
+    const book = await Book.findById(id);
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    if (book.userId !== userId && role !== "admin") {
+      return res.status(403).json({ error: "Forbidden: You can only delete your own books." });
+    }
+
     await Review.deleteMany({ bookId: id }); // Deleting all Reviews of this book
     const deletedBook = await Book.findByIdAndDelete(id);
-    if (!deletedBook) {
-      return res.status(404).json({ message: "Book Deleted" });
-    }
     res.status(200).json({ message: "Book deleted successfully", deletedBook });
   } catch (error) {
     res.status(500).json({ message: "Error deleting book", error });

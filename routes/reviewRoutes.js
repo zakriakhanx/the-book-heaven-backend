@@ -2,7 +2,7 @@ import { Router } from "express";
 import Review from "../models/Review.js";
 import Book from "../models/Book.js";
 import mongoose from "mongoose";
-import { getAuth } from "@clerk/express";
+import { requireAuth, getClerkIdentity } from "../middleware/auth.middleware.js";
 const router = Router();
 
 // Middleware
@@ -24,15 +24,8 @@ router.get("/books/:id/reviews", async (req, res) => {
 });
 
 // Create a new review for a book
-router.post("/books/:id/reviews", async (req, res) => {
+router.post("/books/:id/reviews", requireAuth, async (req, res) => {
   try {
-    const { isAuthenticated } = getAuth(req);
-
-    if (!isAuthenticated) {
-      res.status(401).json({ error: "Unauthenticated" });
-      return;
-    }
-
     const { id } = req.params;
     // Validate if the ID is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -42,9 +35,11 @@ router.post("/books/:id/reviews", async (req, res) => {
     if (!book) return res.status(404).json({ message: "Book not found" });
 
     const { reviewerName, rating, comment } = req.body;
+    const { userId } = getClerkIdentity(req);
+
     const newReview = new Review({
       bookId: id,
-      userId: req.user._id,
+      userId,
       reviewerName,
       rating,
       comment,
@@ -61,15 +56,8 @@ router.post("/books/:id/reviews", async (req, res) => {
 });
 
 // Update a review
-router.put("/reviews/:id", async (req, res) => {
+router.put("/reviews/:id", requireAuth, async (req, res) => {
   try {
-    const { isAuthenticated } = getAuth(req);
-
-    if (!isAuthenticated) {
-      res.status(401).json({ error: "Unauthenticated" });
-      return;
-    }
-    
     const { id } = req.params;
     const updatedReview = await Review.findByIdAndUpdate(id, req.body, {
       new: true,
@@ -87,21 +75,21 @@ router.put("/reviews/:id", async (req, res) => {
 });
 
 // Delete a review
-router.delete("/reviews/:id", async (req, res) => {
+router.delete("/reviews/:id", requireAuth, async (req, res) => {
   try {
-    const { isAuthenticated } = getAuth(req);
-
-    if (!isAuthenticated) {
-      res.status(401).json({ error: "Unauthenticated" });
-      return;
-    }
-    
     const { id } = req.params;
-    const deletedReview = await Review.findByIdAndDelete(id);
+    const { userId, role } = getClerkIdentity(req);
 
-    if (!deletedReview) {
+    const review = await Review.findById(id);
+    if (!review) {
       return res.status(404).json({ message: "Review not found" });
     }
+
+    if (review.userId !== userId && role !== "admin") {
+      return res.status(403).json({ error: "Forbidden: You can only delete your own reviews." });
+    }
+
+    const deletedReview = await Review.findByIdAndDelete(id);
     res
       .status(200)
       .json({ message: "Review deleted successfully", deletedReview });

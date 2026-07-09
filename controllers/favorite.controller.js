@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 import Favorite from "../models/favorite.model.js";
+import { getAuth } from "@clerk/express";
 
 export const getFavorites = async (req, res) =>{
     try {
-        const { id } = req.params;
-        const fav = await Favorite.find({ userId: id });
+        const { userId } = getAuth(req);
+        const fav = await Favorite.find({ userId });
         res.status(200).json(fav);
     } catch (error) {
       res.status(500).json({ message: 'Error fetching favorites', error });
@@ -13,7 +14,10 @@ export const getFavorites = async (req, res) =>{
 
 export const addFavorite = async (req, res) => {
     try {
-        const newFavorite = new Favorite(req.body);
+        const { userId } = getAuth(req);
+        const { bookId } = req.body;
+
+        const newFavorite = new Favorite({ userId, bookId });
         await newFavorite.save();
         res.status(201).json(newFavorite);
     } catch (error) {
@@ -23,9 +27,10 @@ export const addFavorite = async (req, res) => {
 
 export const deleteFavorite = async (req, res) => {
     try {
-        const { id, bookId } = req.params;
+        const { userId } = getAuth(req);
+        const { bookId } = req.params;
 
-        const favFind = await Favorite.findOne({ userId: id, bookId });
+        const favFind = await Favorite.findOne({ userId, bookId });
         if (!favFind) {
             return res.status(404).json({ message: 'Favorite not found' });
         }

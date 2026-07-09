@@ -2,8 +2,7 @@ import mongoose, { mongo } from "mongoose";
 
 const favoriteSchema = mongoose.Schema({
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        type: String,
     },
     bookId: {
         type: mongoose.Schema.Types.ObjectId,
