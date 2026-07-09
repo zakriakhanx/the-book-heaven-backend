@@ -1,14 +1,16 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const favoriteSchema = mongoose.Schema({
     userId: {
         type: String,
+        required: true,
+        unique: true,
     },
-    bookId: {
+    books: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Book',
-    }
-})
+    }],
+});
 
 const Favorite = mongoose.model('Favorite', favoriteSchema);
 
