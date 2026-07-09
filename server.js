@@ -6,18 +6,18 @@ import cors from 'cors'
 import { PORT } from './config/env.js'
 import arcjetMiddleware from './middleware/arcjet.middleware.js'
 import errorMiddleware from './middleware/error.middleware.js'
-import authRouter from './routes/authRoutes.js'
 import favoriteRouter from './routes/favorites.router.js'
+import { clerkMiddleware } from '@clerk/express';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(arcjetMiddleware);
+app.use(clerkMiddleware());
+// app.use(arcjetMiddleware);
 
 app.use('/api', books);
 app.use('/api', review);
-app.use('/api/auth', authRouter);
 app.use('/api', favoriteRouter);
 
 app.use(errorMiddleware);
