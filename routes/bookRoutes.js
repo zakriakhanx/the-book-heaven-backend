@@ -24,9 +24,9 @@ router.get("/books", async (req, res) => {
 // Add a new book to the database
 router.post("/books", requireAuth, async (req, res) => {
   try {
-    const { title, author, genre, description } = req.body;
-    const { userId, userName } = getClerkIdentity(req);
-
+    const { title, author, genre, description, userName } = req.body;
+    const { userId } = await getClerkIdentity(req);
+    
     const newBook = new Book({
       title,
       author,
@@ -38,7 +38,8 @@ router.post("/books", requireAuth, async (req, res) => {
     await newBook.save();
     res.status(201).json(newBook);
   } catch (error) {
-    res.status(500).json({ message: "Error adding book", error });
+    console.error("Error adding book:", error);
+    res.status(500).json({ message: "Error adding book", error: error.message });
   }
 });
 
@@ -65,7 +66,7 @@ router.put("/books/:id", requireAuth, async (req, res) => {
 router.delete("/books/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { userId, role } = getClerkIdentity(req);
+    const { userId, role } = await getClerkIdentity(req);
 
     const book = await Book.findById(id);
     if (!book) {
