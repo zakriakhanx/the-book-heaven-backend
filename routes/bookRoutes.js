@@ -47,12 +47,12 @@ router.post("/books", requireAuth, async (req, res) => {
     const profile = await Profile.findOne({ userId });
 
     if (profile) {
-      await Profile.updateOne({ userId }, { $push: { books: newBook._id } });
+      await Profile.updateOne({ userId }, { $push: { recommendedBooks: newBook._id } });
     } else {
       const newProfile = new Profile({
         userId,
         username: userName,
-        books: [newBook._id],
+        recommendedBooks: [newBook._id],
       });
       await newProfile.save();
     }
@@ -105,7 +105,7 @@ router.delete("/books/:id", requireAuth, async (req, res) => {
     await Review.deleteMany({ bookId: id }); // Deleting all Reviews of this book
     const deletedBook = await Book.findByIdAndDelete(id);
 
-    await Profile.updateOne({ userId: book.userId }, { $pull: { books: id } });
+    await Profile.updateOne({ userId: book.userId }, { $pull: { recommendedBooks: id } });
 
     res.status(200).json({ message: "Book deleted successfully", deletedBook });
   } catch (error) {

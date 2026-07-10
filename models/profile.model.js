@@ -11,7 +11,7 @@ const profileSchema = mongoose.Schema({
         required: true,
         unique: true,
     },
-    books: [{
+    recommendedBooks: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Book',
     }],
