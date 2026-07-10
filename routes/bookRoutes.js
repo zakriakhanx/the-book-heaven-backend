@@ -1,7 +1,12 @@
 import { Router } from "express";
 import Book from "../models/Book.js";
 import Review from "../models/Review.js";
-import { requireAuth, requireAdmin, getClerkIdentity } from "../middleware/auth.middleware.js";
+import Profile from "../models/profile.model.js";
+import {
+  requireAuth,
+  requireAdmin,
+  getClerkIdentity,
+} from "../middleware/auth.middleware.js";
 const router = Router();
 
 // Middleware
@@ -24,9 +29,11 @@ router.get("/books", async (req, res) => {
 // Add a new book to the database
 router.post("/books", requireAuth, async (req, res) => {
   try {
-    const { title, author, genre, description, userName } = req.body;
-    const { userId } = await getClerkIdentity(req);
-    
+    const { title, author, genre, description } = req.body;
+    const { userId, userName } = await getClerkIdentity(req);
+
+    console.log(`from /books ${userId} ${userName}`)
+
     const newBook = new Book({
       title,
       author,
@@ -36,10 +43,26 @@ router.post("/books", requireAuth, async (req, res) => {
       userName,
     });
     await newBook.save();
+
+    const profile = await Profile.findOne({ userId });
+
+    if (profile) {
+      await Profile.updateOne({ userId }, { $push: { books: newBook._id } });
+    } else {
+      const newProfile = new Profile({
+        userId,
+        username: userName,
+        books: [newBook._id],
+      });
+      await newProfile.save();
+    }
+
     res.status(201).json(newBook);
   } catch (error) {
     console.error("Error adding book:", error);
-    res.status(500).json({ message: "Error adding book", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error adding book", error: error.message });
   }
 });
 
@@ -74,11 +97,16 @@ router.delete("/books/:id", requireAuth, async (req, res) => {
     }
 
     if (book.userId !== userId && role !== "admin") {
-      return res.status(403).json({ error: "Forbidden: You can only delete your own books." });
+      return res
+        .status(403)
+        .json({ error: "Forbidden: You can only delete your own books." });
     }
 
     await Review.deleteMany({ bookId: id }); // Deleting all Reviews of this book
     const deletedBook = await Book.findByIdAndDelete(id);
+
+    await Profile.updateOne({ userId: book.userId }, { $pull: { books: id } });
+
     res.status(200).json({ message: "Book deleted successfully", deletedBook });
   } catch (error) {
     res.status(500).json({ message: "Error deleting book", error });

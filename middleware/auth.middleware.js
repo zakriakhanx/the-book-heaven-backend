@@ -2,12 +2,17 @@ import { getAuth, clerkClient } from "@clerk/express";
 
 // Derive the authenticated Clerk user's id and display name from the session.
 // Clerk user IDs are strings (e.g. "user_xxx"), not MongoDB ObjectIds.
-export const getClerkIdentity = (req) => {
+export const getClerkIdentity = async (req) => {
   const { userId, sessionClaims } = getAuth(req);
 
   const role = sessionClaims?.metadata?.role;
 
-  return { userId, role };
+  const user = await clerkClient.users.getUser(userId);
+  const userName = user.username;
+
+  console.log(`from auth middleware ${userName}`)
+  
+  return { userId, role, userName };
 };
 
 // Helper middleware to strictly enforce admin access

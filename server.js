@@ -6,6 +6,7 @@ import cors from 'cors'
 import { PORT } from './config/env.js'
 import errorMiddleware from './middleware/error.middleware.js'
 import favoriteRouter from './routes/favorites.router.js'
+import profileRouter from './routes/profile.router.js'
 import { clerkMiddleware } from '@clerk/express';
 
 const app = express();
@@ -17,6 +18,7 @@ app.use(clerkMiddleware());
 app.use('/api', books);
 app.use('/api', review);
 app.use('/api', favoriteRouter);
+app.use('/api/users', profileRouter);
 
 app.use(errorMiddleware);
 
