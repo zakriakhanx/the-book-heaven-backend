@@ -34,13 +34,12 @@ router.post("/books/:id/reviews", requireAuth, async (req, res) => {
     const book = await Book.findById(id);
     if (!book) return res.status(404).json({ message: "Book not found" });
 
-    const { reviewerName, rating, comment } = req.body;
-    const { userId } = await getClerkIdentity(req);
-
+    const { rating, comment } = req.body;
+    const { userId, userName } = await getClerkIdentity(req);
     const newReview = new Review({
       bookId: id,
       userId,
-      reviewerName,
+      reviewerName: userName,
       rating,
       comment,
     });
