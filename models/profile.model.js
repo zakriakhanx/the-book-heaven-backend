@@ -15,6 +15,10 @@ const profileSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Book',
     }],
+    favoriteBooks: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Book',
+    }],
 });
 
 const Profile = mongoose.model('Profile', profileSchema);

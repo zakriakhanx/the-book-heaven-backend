@@ -105,7 +105,7 @@ router.delete("/books/:id", requireAuth, async (req, res) => {
     await Review.deleteMany({ bookId: id }); // Deleting all Reviews of this book
     const deletedBook = await Book.findByIdAndDelete(id);
 
-    await Profile.updateOne({ userId: book.userId }, { $pull: { recommendedBooks: id } });
+    await Profile.updateOne({ userId: book.userId }, { $pull: { recommendedBooks: id, favoriteBooks: id } });
 
     res.status(200).json({ message: "Book deleted successfully", deletedBook });
   } catch (error) {
