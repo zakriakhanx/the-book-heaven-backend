@@ -8,6 +8,7 @@ import errorMiddleware from './middleware/error.middleware.js'
 import favoriteRouter from './routes/favorites.router.js'
 import profileRouter from './routes/profile.router.js'
 import { clerkMiddleware } from '@clerk/express';
+import searchRouter from './routes/search.router.js'
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use('/api', books);
 app.use('/api', review);
 app.use('/api', favoriteRouter);
 app.use('/api/users', profileRouter);
+app.use('/api', searchRouter);
 
 app.use(errorMiddleware);
 
