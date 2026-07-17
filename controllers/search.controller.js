@@ -11,18 +11,36 @@ export const searchBooks = async (req, res) => {
       return res.status(400).json({ message: "Search query is required" });
     }
 
-    const regex = new RegExp(q.trim(), "i");
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
+    const skip = (page - 1) * limit;
 
-    const books = await Book.find({
+    const regex = new RegExp(q.trim(), "i");
+    const filter = {
       $or: [
         { title: regex },
         { author: regex },
         { genre: regex },
         { description: regex },
       ],
-    });
+    };
 
-    res.status(200).json(books);
+    const [books, totalItems] = await Promise.all([
+      Book.find(filter).skip(skip).limit(limit),
+      Book.countDocuments(filter),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    res.status(200).json({
+      data: books,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems,
+        limit,
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: "Error searching books", error });
   }

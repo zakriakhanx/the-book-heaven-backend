@@ -12,12 +12,30 @@ const timeLog = (req, res, next) => {
 };
 router.use(timeLog);
 
-// Get all reviews for a specific book
+// Get all reviews for a specific book (paginated)
 router.get("/books/:id/reviews", async (req, res) => {
   try {
     const { id } = req.params;
-    const reviews = await Review.find({ bookId: id });
-    res.status(200).json(reviews);
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
+    const skip = (page - 1) * limit;
+
+    const [reviews, totalItems] = await Promise.all([
+      Review.find({ bookId: id }).sort({ _id: -1 }).skip(skip).limit(limit),
+      Review.countDocuments({ bookId: id }),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    res.status(200).json({
+      data: reviews,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems,
+        limit,
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: "Error fetching reviews", error });
   }
