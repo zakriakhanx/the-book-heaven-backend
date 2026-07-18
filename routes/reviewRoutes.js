@@ -52,6 +52,12 @@ router.post("/books/:id/reviews", requireAuth, async (req, res) => {
     const book = await Book.findById(id);
     if (!book) return res.status(404).json({ message: "Book not found" });
 
+    if (book.status !== "allowed") {
+      return res
+        .status(403)
+        .json({ message: "Cannot review a book that is not approved yet." });
+    }
+
     const { rating, comment } = req.body;
     const { userId, userName } = await getClerkIdentity(req);
     const newReview = new Review({

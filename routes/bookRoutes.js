@@ -1,4 +1,5 @@
 import { Router } from "express";
+import mongoose from "mongoose";
 import Book from "../models/Book.js";
 import Review from "../models/Review.js";
 import Profile from "../models/profile.model.js";
@@ -23,9 +24,11 @@ router.get("/books", async (req, res) => {
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
     const skip = (page - 1) * limit;
 
+    const filter = { status: "allowed" };
+
     const [books, totalItems] = await Promise.all([
-      Book.find().sort({ _id: -1 }).skip(skip).limit(limit),
-      Book.countDocuments(),
+      Book.find(filter).sort({ _id: -1 }).skip(skip).limit(limit),
+      Book.countDocuments(filter),
     ]);
 
     const totalPages = Math.ceil(totalItems / limit);
@@ -44,11 +47,31 @@ router.get("/books", async (req, res) => {
   }
 });
 
+// Retrieve a single book by id
+router.get("/books/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid book id" });
+    }
+
+    const book = await Book.findById(id);
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    res.status(200).json(book);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching book", error });
+  }
+});
+
 // Add a new book to the database
 router.post("/books", requireAuth, async (req, res) => {
   try {
     const { title, author, genre, description } = req.body;
-    const { userId, userName } = await getClerkIdentity(req);
+    const { userId, userName, role } = await getClerkIdentity(req);
 
     console.log(`from /books ${userId} ${userName}`)
 
@@ -59,6 +82,7 @@ router.post("/books", requireAuth, async (req, res) => {
       description,
       userId,
       userName,
+      status: role === "admin" ? "allowed" : "pending",
     });
     await newBook.save();
 

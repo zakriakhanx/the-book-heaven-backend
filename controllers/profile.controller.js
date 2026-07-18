@@ -18,26 +18,47 @@ export const getProfileByUsername = async (req, res) => {
 
     console.log("iswoner",isOwner)
 
-    const profile = await Profile.findOne({ username })
-      .populate("recommendedBooks")
-      .populate(isOwner ? "favoriteBooks" : "");
+    const recommendedMatch = isOwner ? {} : { status: "allowed" };
+
+    const query = Profile.findOne({ username }).populate({
+      path: "recommendedBooks",
+      match: recommendedMatch,
+    });
+
+    if (isOwner) {
+      query.populate({
+        path: "favoriteBooks",
+        match: { status: "allowed" },
+      });
+    }
+
+    const profile = await query;
 
       console.log("profile", profile)
     if (!profile) {
+      if (isOwner) {
+        return res.status(200).json({
+          username,
+          recommendedBooks: [],
+          favoriteBooks: [],
+        });
+      }
       return res.status(404).json({ message: "Profile not found" });
     }
+
+    const recommendedBooks = (profile.recommendedBooks || []).filter(Boolean);
 
     if (isOwner) {
       return res.status(200).json({
         username: profile.username,
-        recommendedBooks: profile.recommendedBooks,
-        favoriteBooks: profile.favoriteBooks,
+        recommendedBooks,
+        favoriteBooks: (profile.favoriteBooks || []).filter(Boolean),
       });
     }
 
     return res.status(200).json({
       username: profile.username,
-      recommendedBooks: profile.recommendedBooks,
+      recommendedBooks,
     });
   } catch (error) {
     res.status(500).json({ message: "Error fetching profile", error });
@@ -49,7 +70,9 @@ export const getFavorites = async (req, res) => {
     const { userId } = getAuth(req);
     const profile = await Profile.findOne({ userId }).populate("favoriteBooks");
 
-    res.status(200).json(profile ? profile.favoriteBooks : []);
+    res
+      .status(200)
+      .json(profile ? (profile.favoriteBooks || []).filter(Boolean) : []);
   } catch (error) {
     res.status(500).json({ message: "Error fetching favorites", error });
   }
@@ -57,20 +80,19 @@ export const getFavorites = async (req, res) => {
 
 export const addFavorite = async (req, res) => {
   try {
-    const { userId } = getAuth(req);
+    const { userId, userName } = await getClerkIdentity(req);
     const { bookId } = req.body;
 
     const profile = await Profile.findOneAndUpdate(
       { userId },
-      { $addToSet: { favoriteBooks: bookId } },
-      { new: true },
+      {
+        $addToSet: { favoriteBooks: bookId },
+        $setOnInsert: { userId, username: userName },
+      },
+      { new: true, upsert: true },
     ).populate("favoriteBooks");
 
-    if (!profile) {
-      return res.status(404).json({ message: "Profile not found" });
-    }
-
-    res.status(201).json(profile.favoriteBooks);
+    res.status(201).json((profile.favoriteBooks || []).filter(Boolean));
   } catch (error) {
     res.status(500).json({ message: "Error adding favorite", error });
   }

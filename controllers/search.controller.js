@@ -17,6 +17,7 @@ export const searchBooks = async (req, res) => {
 
     const regex = new RegExp(q.trim(), "i");
     const filter = {
+      status: "allowed",
       $or: [
         { title: regex },
         { author: regex },

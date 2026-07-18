@@ -5,10 +5,9 @@ import { getAuth, clerkClient } from "@clerk/express";
 export const getClerkIdentity = async (req) => {
   const { userId, sessionClaims } = getAuth(req);
 
-  const role = sessionClaims?.metadata?.role;
-
   const user = await clerkClient.users.getUser(userId);
   const userName = user.username;
+  const role = sessionClaims?.metadata?.role ?? user.publicMetadata?.role;
 
   console.log(`from auth middleware ${userName}`)
   
@@ -16,14 +15,32 @@ export const getClerkIdentity = async (req) => {
 };
 
 // Helper middleware to strictly enforce admin access
-export const requireAdmin = (req, res, next) => {
-  const sessionClaims = req.auth?.sessionClaims;
-  const role = sessionClaims?.metadata?.role;
+export const requireAdmin = async (req, res, next) => {
+  try {
+    const { userId, sessionClaims } = getAuth(req);
 
-  if (role !== "admin") {
-    return res.status(403).json({ error: "Forbidden: Admin access required." });
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    let role = sessionClaims?.metadata?.role;
+
+    if (role !== "admin") {
+      const user = await clerkClient.users.getUser(userId);
+      role = user.publicMetadata?.role;
+    }
+
+    if (role !== "admin") {
+      return res
+        .status(403)
+        .json({ error: "Forbidden: Admin access required." });
+    }
+
+    next();
+  } catch (error) {
+    console.error("Error verifying admin access:", error);
+    res.status(500).json({ error: "Error verifying admin access" });
   }
-  next();
 };
 
 export const requireAuth = (req, res, next) => {
