@@ -17,11 +17,11 @@ app.use(cors());
 app.use(express.json());
 app.use(clerkMiddleware());
 
+app.use('/api', searchRouter);
 app.use('/api', books);
 app.use('/api', review);
 app.use('/api', favoriteRouter);
 app.use('/api/users', profileRouter);
-app.use('/api', searchRouter);
 app.use('/api', adminRouter);
 
 app.use(errorMiddleware);
