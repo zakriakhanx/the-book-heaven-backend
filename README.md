@@ -1,6 +1,6 @@
 # The Book Heaven — Backend
 
-Express + MongoDB REST API for **The Book Heaven**, a community-driven book recommendation platform. See the [root README](https://github.com/zakriayousafzai/the-book-heaven-frontend) for the full project overview, then start here for backend specifics.
+Express + MongoDB REST API for **The Book Heaven**, a community-driven book recommendation platform. See the [Frontend README](https://github.com/zakriayousafzai/the-book-heaven-frontend) for the full project overview, then start here for backend specifics.
 
 ## Stack
 
