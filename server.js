@@ -1,6 +1,6 @@
 import express from 'express'
 import books from './routes/book.router.js'
-import review from './routes/reviewRoutes.js'
+import review from './routes/review.router.js'
 import connectToDatabase from './config/db.js'
 import cors from 'cors'
 import { PORT } from './config/env.js'

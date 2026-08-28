@@ -47,7 +47,7 @@ CLERK_SECRET_KEY=<your clerk secret key>
 ### Search (`routes/search.router.js`)
 - `GET /api/books/search?q=` — case-insensitive regex search on title/author/genre/description (allowed books only)
 
-### Reviews (`routes/reviewRoutes.js`)
+### Reviews (`routes/review.router.js`)
 - `GET    /api/books/:id/reviews` — paginated reviews for a book
 - `POST   /api/books/:id/reviews` — `requireAuth` — add a review (book must be `allowed`)
 - `PUT    /api/reviews/:id` — `requireAuth` — update a review
