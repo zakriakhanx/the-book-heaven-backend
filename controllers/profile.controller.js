@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import Profile from "../models/profile.model.js";
 import { getAuth } from "@clerk/express";
 import { getClerkIdentity } from "../middleware/auth.middleware.js";

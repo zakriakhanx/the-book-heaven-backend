@@ -1,5 +1,5 @@
-import Review from "../models/Review.js";
-import Book from "../models/Book.js";
+import Review from "../models/review.model.js";
+import Book from "../models/book.model.js";
 import mongoose from "mongoose";
 import { getClerkIdentity } from "../middleware/auth.middleware.js";
 

@@ -1,7 +1,4 @@
-import mongoose from "mongoose";
-import { getAuth } from "@clerk/express";
-import { getClerkIdentity } from "../middleware/auth.middleware.js";
-import Book from "../models/Book.js";
+import Book from "../models/book.model.js";
 
 export const searchBooks = async (req, res) => {
   try {
