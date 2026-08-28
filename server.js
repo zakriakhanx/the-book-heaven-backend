@@ -1,5 +1,5 @@
 import express from 'express'
-import books from './routes/bookRoutes.js'
+import books from './routes/book.router.js'
 import review from './routes/reviewRoutes.js'
 import connectToDatabase from './config/db.js'
 import cors from 'cors'

@@ -37,7 +37,7 @@ CLERK_SECRET_KEY=<your clerk secret key>
 
 ## Routes
 
-### Books (`routes/bookRoutes.js`)
+### Books (`routes/book.router.js`)
 - `GET  /api/books` — paginated list of `allowed` books
 - `GET  /api/books/:id` — single book (validates ObjectId)
 - `POST /api/books` — `requireAuth`; create recommendation (admins → `allowed`, others → `pending`); also links the book to the author's profile
