@@ -10,13 +10,6 @@ import {
 } from "../middleware/auth.middleware.js";
 const router = Router();
 
-// Middleware
-const timeLog = (req, res, next) => {
-  console.log("Time: ", Date.now());
-  next();
-};
-router.use(timeLog);
-
 // Retrieve a list of all books (paginated)
 router.get("/books", async (req, res) => {
   try {
